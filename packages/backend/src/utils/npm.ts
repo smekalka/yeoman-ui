@@ -28,13 +28,20 @@ export type PackagesData = {
 export const isWin32 = platform() === "win32";
 const NPM = isWin32 ? "npm.cmd" : "npm";
 
-const regUrl = new URL(_.get(process, "env.NPM_CFG_REGISTRY", "http://registry.npmjs.com/"));
-regUrl.pathname = `-/v1/search`;
-const SEARCH_QUERY_PREFIX = `${regUrl.toString()}?text=`;
+const NPM_REGISTRY_HOST = _.get(process, "env.NPM_CFG_REGISTRY", "http://registry.npmjs.com/");
+const SEARCH_QUERY_PREFIX = `${NPM_REGISTRY_HOST}-/v1/search?text=`;
 const SEARCH_QUERY_SUFFIX = "keywords:yeoman-generator &size=25&ranking=popularity";
 
 const CANCELED = "Action cancelled";
 const HAS_ACCESS = "Has Access";
+
+const OS_MAP: { [key: string]: string } = {
+  linux: "linux",
+  win32: "windows",
+  darwin: "osx",
+};
+
+const OS = OS_MAP[platform()] ?? platform();
 
 class Command {
   private globalNodeModulesPathPromise: Promise<string>;
@@ -45,10 +52,39 @@ class Command {
     this.SET_DEFAULT_LOCATION = messages.set_default_location(customLocation.DEFAULT_LOCATION);
   }
 
+  private getShellCommand(): string | undefined {
+    const config = vscode.workspace.getConfiguration();
+    const shellOptions = config.get(`terminal.integrated.automationProfile.${OS}`);
+    const shell = shellOptions?.path ?? vscode.env.shell;
+    const shellArgs = [...(shellOptions?.args ?? [])];
+    if (shell) {
+      if (isWin32) {
+        const basename = path.posix.basename(shell);
+        if (basename === "powershell.exe" || basename === "pwsh.exe") {
+          shellArgs.push("-Command");
+        } else if (basename === "bash.exe" || basename === "zsh.exe") {
+          shellArgs.push("-c");
+        } else if (basename === "wsl.exe") {
+          shellArgs.push("-e");
+        } else {
+          shellArgs.push("/d", "/c");
+        }
+      } else {
+        shellArgs.push("-c");
+      }
+
+      return `${shell} ${shellArgs.join(" ")}`;
+    }
+  }
+
   private setGlobalNodeModulesPath() {
-    this.globalNodeModulesPathPromise = this.execCommand(`${NPM} root -g`).then((globalNodeModulesPath: string) => {
-      return fs.promises.mkdir(globalNodeModulesPath, { recursive: true }).then(() => globalNodeModulesPath);
-    });
+    const shell = this.getShellCommand();
+    const command = `${NPM} root -g`;
+    this.globalNodeModulesPathPromise = this.execCommand(shell ? `${shell} -c "${command}"` : command).then(
+      (globalNodeModulesPath: string) => {
+        return fs.promises.mkdir(globalNodeModulesPath, { recursive: true }).then(() => globalNodeModulesPath);
+      }
+    );
   }
 
   private getGenLocationParams(): string {

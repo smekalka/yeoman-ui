@@ -27,9 +27,20 @@ const returnPromise = (...args: any[]) => {
   return Promise.resolve();
 };
 
-const configObj = { get: returnValue, update: returnValue };
+const configObj = {
+  get: (key: string) => {
+    if (/^terminal\.integrated\.automationProfile\.[A-Za-z0-9_-]+$/.exec(key)) {
+      return undefined;
+    }
+    return returnValue(key);
+  },
+  update: returnValue,
+};
+
 const globalStateObj = { get: returnValue, update: returnValue } as any;
 const context = { globalState: globalStateObj, extensionPath: "" };
+
+const env = {};
 
 const Uri = {
   file: (path?: string) => {
@@ -80,6 +91,7 @@ const ViewColumn = {
 const vscodeMock = {
   Uri,
   context,
+  env,
   workspace,
   commands,
   window,

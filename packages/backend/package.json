@@ -1,9 +1,9 @@
 {
   "name": "yeoman-ui",
   "displayName": "Application Wizard",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "private": true,
-  "description": "Provides rich user experience for Yeoman generators.",
+  "description": "Provides rich user experience for Yeoman generators. Forked from https://github.com/SAP/yeoman-ui",
   "categories": [
     "Other"
   ],
@@ -11,21 +11,26 @@
     "yeoman",
     "yo",
     "wizard",
-    "sap",
+    "extremum",
     "generator"
   ],
   "bugs": {
-    "url": "https://github.com/SAP/yeoman-ui/issues"
+    "url": "https://github.com/smekalka/yeoman-ui/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SAP/yeoman-ui.git"
+    "url": "https://github.com/smekalka/yeoman-ui.git"
   },
   "license": "Apache 2.0",
-  "author": {
-    "name": "SAP SE"
-  },
-  "publisher": "SAPOS",
+  "contributors": [
+    {
+      "name": "SAP SE"
+    },
+    {
+      "name": "Smekalka"
+    }
+  ],
+  "publisher": "Smekalka",
   "main": "./dist/extension",
   "scripts": {
     "bundle": "webpack --mode production",
