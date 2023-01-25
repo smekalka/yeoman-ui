@@ -5,7 +5,7 @@
   "private": true,
   "description": "Frontend for the application wizard framework",
   "license": "Apache 2.0",
-  "publisher": "SAP",
+  "publisher": "smekalka",
   "scripts": {
     "build": "vue-cli-service build",
     "build-dev": "vue-cli-service build --mode development",
